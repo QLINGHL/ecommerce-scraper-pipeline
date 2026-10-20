@@ -50,7 +50,7 @@ ecommerce-scraper-pipeline/
 ├── sample_data/
 │   └── sample_page.html         # sample input for extract_emails.py
 ├── test_pipeline.py             # pipeline unit check on fake raw items
-└── output/                      # books.csv / books.json land here
+└── output/                      # books.csv / books.json / dataset_summary.md
 ```
 
 ## How to run
@@ -59,7 +59,7 @@ ecommerce-scraper-pipeline/
 python -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 
-# Full crawl (~1,000 books, a few minutes at the polite default delay)
+# Full crawl (~1,000 books, ~20 minutes at the polite default delay)
 scrapy crawl books
 
 # Quick smoke run — stop after 10 items
@@ -71,13 +71,22 @@ Results:
 - `output/books.csv`
 - `output/books.json`
 
+The copies in `output/` are from a **full crawl of all 1,000 books**
+(no items dropped by validation). Headline numbers: prices run
+£10.00–£59.99 (average £35.07), ratings spread across all five star
+levels, 0 duplicate UPCs. The full breakdown — rating distribution,
+top-5 most expensive, data-quality checks — is in
+**[output/dataset_summary.md](output/dataset_summary.md)**.
+
 ### Sample output
+
+First rows of the full-crawl `books.csv`:
 
 | title | price | currency | rating | availability | stock_count | upc |
 |---|---|---|---|---|---|---|
-| A Light in the Attic | 51.77 | GBP | 3 | In stock | 22 | A897FE39B1053632 |
-| Tipping the Velvet | 53.74 | GBP | 1 | In stock | 20 | E30F54CEA2AEC58F |
-| Soumission | 50.10 | GBP | 1 | In stock | 20 | 6957F44C3847A3FE |
+| It's Only the Himalayas | 45.17 | GBP | 2 | In stock | 19 | A22124811BFA8350 |
+| Libertarianism for Beginners | 51.33 | GBP | 2 | In stock | 19 | A18A4F574854ACED |
+| Mesaerion: The Best Science Fiction Stories 1800-1849 | 37.59 | GBP | 1 | In stock | 19 | E30F54CEA9B38190 |
 
 Fields: `title`, `price` (float), `currency`, `rating` (1–5 int),
 `availability`, `stock_count`, `upc`, `product_url`.
