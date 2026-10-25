@@ -46,6 +46,8 @@ ecommerce-scraper-pipeline/
 │   ├── settings.py              # politeness, pipelines, feed exports
 │   └── spiders/
 │       └── books_spider.py      # catalogue + detail page spider
+├── llm_extract.py               # LLM structured extraction: page text -> unified product JSON (offline parser fallback, no key needed)
+├── test_llm_extract.py          # tests for llm_extract.py (fake LLM client, no key needed)
 ├── extract_emails.py            # standalone email-extraction utility
 ├── sample_data/
 │   └── sample_page.html         # sample input for extract_emails.py
@@ -70,6 +72,25 @@ Results:
 
 - `output/books.csv`
 - `output/books.json`
+
+## LLM structured extraction
+
+`llm_extract.py` turns raw product-page text into the same unified
+JSON record the pipeline produces. With no key it runs the offline
+parser (same price / rating / availability rules as `pipelines.py`);
+with `OPENAI_API_KEY` set, `--llm` sends the text to an
+OpenAI-compatible model and validates the reply, filling any missing
+or invalid field from the offline parser — a model failure never loses
+the record:
+
+```bash
+python llm_extract.py --input page.txt
+cat page.txt | python llm_extract.py
+python llm_extract.py --input page.txt --llm --output product.json
+
+# tests (no key needed)
+python -m pytest test_llm_extract.py -q
+```
 
 The copies in `output/` are from a **full crawl of all 1,000 books**
 (no items dropped by validation). Headline numbers: prices run
