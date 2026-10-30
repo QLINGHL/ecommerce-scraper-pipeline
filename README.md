@@ -46,13 +46,17 @@ ecommerce-scraper-pipeline/
 │   ├── settings.py              # politeness, pipelines, feed exports
 │   └── spiders/
 │       └── books_spider.py      # catalogue + detail page spider
+├── sentiment.py                 # offline lexicon sentiment classifier (negation + intensifiers, stdlib only)
+├── test_sentiment.py          # tests for sentiment.py
 ├── llm_extract.py               # LLM structured extraction: page text -> unified product JSON (offline parser fallback, no key needed)
 ├── test_llm_extract.py          # tests for llm_extract.py (fake LLM client, no key needed)
 ├── extract_emails.py            # standalone email-extraction utility
 ├── sample_data/
-│   └── sample_page.html         # sample input for extract_emails.py
+│   ├── sample_page.html         # sample input for extract_emails.py
+│   └── sample_reviews.csv       # sample review input for sentiment.py
 ├── test_pipeline.py             # pipeline unit check on fake raw items
 └── output/                      # books.csv / books.json / dataset_summary.md
+                                 # books_with_sentiment.csv (derived: title-word sentiment)
 ```
 
 ## How to run
@@ -72,6 +76,42 @@ Results:
 
 - `output/books.csv`
 - `output/books.json`
+
+## Review sentiment classification (offline lexicon)
+
+`sentiment.py` classifies review text into positive / neutral /
+negative with a small English polarity lexicon, negation handling
+("not good" → negative) and intensifiers ("very good" scores higher
+than "good"). No model, no key, stdlib only:
+
+```bash
+python sentiment.py --text "I loved this book, brilliant and funny"
+# {"label": "positive", "score": 3.0, "positive": 3, "negative": 0}
+
+# enrich any CSV that has a text column
+python sentiment.py --input reviews.csv --text-column review \
+    --output reviews_with_sentiment.csv
+# adds sentiment + sentiment_score columns, prints the label summary
+
+# demo on the bundled sample reviews (8 rows)
+python sentiment.py --input sample_data/sample_reviews.csv \
+    --text-column review --output /tmp/reviews_with_sentiment.csv
+# summary: positive 4, negative 3, neutral 1
+
+# tests (no key needed)
+python -m pytest test_sentiment.py -q
+```
+
+One honest caveat, documented here rather than hidden: **the books
+dataset itself has no review text** — books.toscrape.com ships no
+reviews, and the crawl only collects title / price / rating /
+availability / UPC. So `output/books_with_sentiment.csv` is a derived
+file that classifies **title words** (e.g. "perfect", "dark") instead
+of reviews, and it shows exactly what that limitation predicts:
+1000 rows, **68 positive, 26 negative, 906 neutral** — titles carry
+little sentiment. The classifier itself is built for real review text
+(see `sample_data/sample_reviews.csv`); point it at a dataset that
+actually has a review column and the same command works unchanged.
 
 ## LLM structured extraction
 

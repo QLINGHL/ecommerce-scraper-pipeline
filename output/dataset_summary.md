@@ -37,3 +37,19 @@ Generated from the full crawl output (`books.csv` / `books.json`, 1000 records).
 - All prices parsed as numbers: **yes**
 - All ratings within 1–5: **yes**
 - CSV / JSON row counts agree: **yes (1000)**
+
+## Title-word sentiment (derived, see sentiment.py)
+
+`output/books_with_sentiment.csv` adds `sentiment` + `sentiment_score`
+columns, classified from title words by the offline lexicon in
+`sentiment.py` (books.toscrape.com ships no review text, so this is
+title sentiment, not review sentiment):
+
+| Sentiment | Books | Share |
+|-----------|------:|------:|
+| positive | 68 | 6.8% |
+| negative | 26 | 2.6% |
+| neutral | 906 | 90.6% |
+
+Titles carry little sentiment, as expected; the classifier itself is
+built for review text (see `sample_data/sample_reviews.csv`).
