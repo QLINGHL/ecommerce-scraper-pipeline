@@ -48,6 +48,8 @@ ecommerce-scraper-pipeline/
 │       └── books_spider.py      # catalogue + detail page spider
 ├── sentiment.py                 # offline lexicon sentiment classifier (negation + intensifiers, stdlib only)
 ├── test_sentiment.py          # tests for sentiment.py
+├── dataset_summary.py           # regenerate output/dataset_summary.md from books.csv (overview, rating distribution, price histogram, top-5, quality checks)
+├── test_dataset_summary.py    # tests for dataset_summary.py
 ├── llm_extract.py               # LLM structured extraction: page text -> unified product JSON (offline parser fallback, no key needed)
 ├── test_llm_extract.py          # tests for llm_extract.py (fake LLM client, no key needed)
 ├── extract_emails.py            # standalone email-extraction utility
@@ -112,6 +114,26 @@ of reviews, and it shows exactly what that limitation predicts:
 little sentiment. The classifier itself is built for real review text
 (see `sample_data/sample_reviews.csv`); point it at a dataset that
 actually has a review column and the same command works unchanged.
+
+## Dataset summary (with price histogram)
+
+`dataset_summary.py` regenerates `output/dataset_summary.md` from the
+crawl output — overview stats, rating distribution, top-5 most
+expensive books, data-quality checks — plus a **price-distribution
+histogram** (£5 bins, ASCII bar chart + counts table):
+
+```bash
+python dataset_summary.py
+# Wrote output/dataset_summary.md (1000 books, 10 price bins)
+
+python dataset_summary.py --bin-width 10 --output /tmp/summary.md
+
+# tests (no key needed)
+python -m pytest test_dataset_summary.py -q
+```
+
+The 1000-book catalogue is roughly uniform across £10–£60: every £5
+bin holds 8–11% of the books, so no price point dominates.
 
 ## LLM structured extraction
 

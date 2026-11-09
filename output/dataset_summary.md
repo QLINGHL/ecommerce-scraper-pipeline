@@ -1,6 +1,6 @@
 # Dataset Summary — books.toscrape.com full catalogue
 
-Generated from the full crawl output (`books.csv` / `books.json`, 1000 records).
+Generated from the full crawl output (`books.csv` / `books.json`, 1000 records) by `dataset_summary.py`.
 
 ## Overview
 
@@ -21,6 +21,36 @@ Generated from the full crawl output (`books.csv` / `books.json`, 1000 records).
 | 4 | 179 | 17.9% |
 | 5 | 196 | 19.6% |
 
+## Price distribution
+
+Prices in £5 bins. The catalogue is roughly uniform across the range, with no price point dominating:
+
+```
+     £10–£15 | ######################################    106 (10.6%)
+     £15–£20 | ################################           90 ( 9.0%)
+     £20–£25 | ####################################      103 (10.3%)
+     £25–£30 | ####################################      103 (10.3%)
+     £30–£35 | #############################              82 ( 8.2%)
+     £35–£40 | ########################################  113 (11.3%)
+     £40–£45 | ####################################      102 (10.2%)
+     £45–£50 | ####################################      103 (10.3%)
+     £50–£55 | ###################################       100 (10.0%)
+     £55–£60 | ###################################        98 ( 9.8%)
+```
+
+| Price range | Books | Share |
+|------------:|------:|------:|
+| £10–£15 | 106 | 10.6% |
+| £15–£20 | 90 | 9.0% |
+| £20–£25 | 103 | 10.3% |
+| £25–£30 | 103 | 10.3% |
+| £30–£35 | 82 | 8.2% |
+| £35–£40 | 113 | 11.3% |
+| £40–£45 | 102 | 10.2% |
+| £45–£50 | 103 | 10.3% |
+| £50–£55 | 100 | 10.0% |
+| £55–£60 | 98 | 9.8% |
+
 ## Top 5 most expensive books
 
 | Price | Title | Rating | UPC |
@@ -40,10 +70,7 @@ Generated from the full crawl output (`books.csv` / `books.json`, 1000 records).
 
 ## Title-word sentiment (derived, see sentiment.py)
 
-`output/books_with_sentiment.csv` adds `sentiment` + `sentiment_score`
-columns, classified from title words by the offline lexicon in
-`sentiment.py` (books.toscrape.com ships no review text, so this is
-title sentiment, not review sentiment):
+`output/books_with_sentiment.csv` adds `sentiment` + `sentiment_score` columns, classified from title words by the offline lexicon in `sentiment.py` (books.toscrape.com ships no review text, so this is title sentiment, not review sentiment):
 
 | Sentiment | Books | Share |
 |-----------|------:|------:|
@@ -51,5 +78,4 @@ title sentiment, not review sentiment):
 | negative | 26 | 2.6% |
 | neutral | 906 | 90.6% |
 
-Titles carry little sentiment, as expected; the classifier itself is
-built for review text (see `sample_data/sample_reviews.csv`).
+Titles carry little sentiment, as expected; the classifier itself is built for review text (see `sample_data/sample_reviews.csv`).
