@@ -52,6 +52,8 @@ ecommerce-scraper-pipeline/
 ├── test_dataset_summary.py    # tests for dataset_summary.py
 ├── llm_extract.py               # LLM structured extraction: page text -> unified product JSON (offline parser fallback, no key needed)
 ├── test_llm_extract.py          # tests for llm_extract.py (fake LLM client, no key needed)
+├── near_duplicates.py           # near-duplicate detection: word-frequency cosine similarity + union-find grouping (stdlib only)
+├── test_near_duplicates.py      # tests for near_duplicates.py
 ├── extract_emails.py            # standalone email-extraction utility
 ├── sample_data/
 │   ├── sample_page.html         # sample input for extract_emails.py
@@ -153,6 +155,41 @@ python llm_extract.py --input page.txt --llm --output product.json
 # tests (no key needed)
 python -m pytest test_llm_extract.py -q
 ```
+
+## Near-duplicate detection
+
+`near_duplicates.py` catches the duplicates UPC dedupe misses: same
+product re-listed with slightly different text. It scores two texts
+by **term-frequency cosine similarity** (word order ignored, case and
+punctuation ignored) and groups rows at or above a threshold
+(default 0.85) with union-find, so a chain A~B, B~C becomes one
+group. Stdlib only, no key needed:
+
+```bash
+python near_duplicates.py --text-a "red leather wallet" \
+    --text-b "red leather wallet handmade"
+# {"similarity": 0.8660254037844387}
+
+# report duplicate groups among the crawled titles
+python near_duplicates.py --input output/books.csv \
+    --text-column title --threshold 0.85 --report
+
+# or write the CSV back with a duplicate_group column (0 = unique)
+python near_duplicates.py --input output/books.csv \
+    --text-column title --output output/books_deduped.csv
+
+# tests (no key needed)
+python -m pytest test_near_duplicates.py -q
+```
+
+On the real 1,000-title catalogue it finds 3 groups of 2 at 0.85 —
+two of them honest borderline calls, documented here rather than
+hidden: "Life" vs "Life After Life" (a one-word title clears the
+threshold almost by definition) and two volumes of the same series
+("The Wicked + The Divine, Vol. 1" vs "Vol. 3"). Short titles need
+a higher threshold, or a minimum-word filter, before this is trusted
+to auto-delete rows — the tool flags candidates; a human (or the
+UPC check) makes the call.
 
 The copies in `output/` are from a **full crawl of all 1,000 books**
 (no items dropped by validation). Headline numbers: prices run
